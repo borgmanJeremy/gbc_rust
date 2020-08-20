@@ -49,27 +49,61 @@ impl Flag {
 }
 
 #[derive(Debug)]
-struct Cpu {
+struct MemoryMap {
+    map: Vec<u8>,
+}
+
+impl MemoryMap {
+    fn new(memory_size: usize) -> MemoryMap {
+        let mut map = Vec::new();
+        map.resize(memory_size, 0);
+        MemoryMap { map }
+    }
+}
+
+#[derive(Debug)]
+pub struct Cpu {
     flag: Flag,
     reg: Reg,
+    memory: MemoryMap,
 }
 
 impl Cpu {
-    fn new() -> Cpu {
+    pub fn new() -> Cpu {
         Cpu {
             flag: Flag::new(),
             reg: Reg::new(),
+            memory: MemoryMap::new(0xFFFF),
+        }
+    }
+
+    pub fn step(&mut self) {
+        match self.memory.map[self.reg.pc as usize] {
+            0x06 => {
+                self.reg.b = self.memory.map[self.reg.pc as usize + 1];
+                self.reg.pc += 2;
+            }
+            _ => panic!("{} op code not implemented", self.reg.pc),
         }
     }
 }
 
 fn main() {
-    let instruction = 0x06;
     let mut cpu = Cpu::new();
-    match instruction {
-        0x06 => {
-            cpu.reg.b = 2;
-        }
-        _ => panic!("{} op code not implemented", instruction),
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn load_b() {
+        let instruction = 0x06;
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x06;
+        cpu.memory.map[1] = 0xFE;
+
+        cpu.step();
+        assert_eq!(cpu.reg.b , 0xFE);
     }
 }
