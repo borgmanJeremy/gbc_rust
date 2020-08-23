@@ -27,6 +27,10 @@ impl Reg {
             sp: 0,
         }
     }
+
+    fn hl_address(&self) -> usize {
+        ((self.h as usize) << 8) + self.l as usize
+    }
 }
 
 #[derive(Debug)]
@@ -147,15 +151,14 @@ impl Cpu {
                 self.reg.a = self.reg.l;
                 self.reg.pc += 1;
                 self.cycles += 4;
-            },
+            }
             0x7E => {
-                let address = ((self.reg.h as usize) << 8) +self.reg.l as usize;
+                let address = self.reg.hl_address();
+                
                 self.reg.a = self.memory.map[address];
                 self.reg.pc += 1;
                 self.cycles += 8;
-            },
-
-
+            }
 
             _ => panic!("{} op code not implemented", self.reg.pc),
         }
@@ -167,6 +170,17 @@ fn main() {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_hl_dereference() {
+        let mut cpu = Cpu::new();
+        cpu.reg.h = 0x80;
+        cpu.reg.l = 0x12;
+
+        let address = cpu.reg.hl_address();
+        assert_eq!(address, 0x8012);
+    }
+
     #[test]
     fn load_immediate_b() {
         let mut cpu = Cpu::new();
@@ -240,7 +254,7 @@ mod tests {
     }
 
     #[test]
-    fn load_a_to_a() {
+    fn load_a_from_a() {
         let mut cpu = Cpu::new();
         cpu.memory.map[0] = 0x7F;
         cpu.reg.a = 0x01;
@@ -251,6 +265,86 @@ mod tests {
         assert_eq!(cpu.cycles, 0x04);
     }
 
+    #[test]
+    fn load_a_from_b() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x78;
+        cpu.reg.a = 0x00;
+        cpu.reg.b = 0x01;
 
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.b, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
 
+    #[test]
+    fn load_a_from_c() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x79;
+        cpu.reg.a = 0x00;
+        cpu.reg.c = 0x01;
+
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.c, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
+
+    #[test]
+    fn load_a_from_d() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x7A;
+        cpu.reg.a = 0x00;
+        cpu.reg.d = 0x01;
+
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.d, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
+    #[test]
+    fn load_a_from_e() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x7B;
+        cpu.reg.a = 0x00;
+        cpu.reg.e = 0x01;
+
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.e, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
+
+    #[test]
+    fn load_a_from_h() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x7C;
+        cpu.reg.a = 0x00;
+        cpu.reg.h = 0x01;
+
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.h, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
+
+    #[test]
+    fn load_a_from_l() {
+        let mut cpu = Cpu::new();
+        cpu.memory.map[0] = 0x7D;
+        cpu.reg.a = 0x00;
+        cpu.reg.l = 0x01;
+
+        cpu.step();
+        assert_eq!(cpu.reg.a, 0x01);
+        assert_eq!(cpu.reg.l, 0x01);
+        assert_eq!(cpu.reg.pc, 0x01);
+        assert_eq!(cpu.cycles, 0x04);
+    }
 }
