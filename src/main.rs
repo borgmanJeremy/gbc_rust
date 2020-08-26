@@ -3,5 +3,5 @@ use gba::memory::*;
 
 fn main() {
     let mem = MemoryMap::new(0xFFFF);
-    let cpu = Cpu::new(&mem);
+    let _cpu = Cpu::new(&mem);
 }

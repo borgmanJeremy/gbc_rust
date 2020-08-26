@@ -183,6 +183,246 @@ impl Cpu<'_> {
                 self.cycles += 8;
             }
 
+            // 8 bit loads to C (Register)
+            0x48 => {
+                self.reg.c = self.reg.b;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x49 => {
+                self.reg.c = self.reg.c;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4A => {
+                self.reg.c = self.reg.d;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4B => {
+                self.reg.c = self.reg.e;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4C => {
+                self.reg.c = self.reg.h;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4D => {
+                self.reg.c = self.reg.l;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4E => {
+                let address = self.reg.hl_address();
+                self.reg.c = self.memory.read(address);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            // 8 bit loads to D (Register)
+            0x50 => {
+                self.reg.d = self.reg.b;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x51 => {
+                self.reg.d = self.reg.c;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x52 => {
+                self.reg.d = self.reg.d;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x53 => {
+                self.reg.d = self.reg.e;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x54 => {
+                self.reg.d = self.reg.h;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x55 => {
+                self.reg.d = self.reg.l;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x56 => {
+                let address = self.reg.hl_address();
+                self.reg.d = self.memory.read(address);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            // 8 bit loads to E (Register)
+            0x58 => {
+                self.reg.e = self.reg.b;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x59 => {
+                self.reg.e = self.reg.c;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x5A => {
+                self.reg.e = self.reg.d;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x5B => {
+                self.reg.e = self.reg.e;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x5C => {
+                self.reg.e = self.reg.h;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x5D => {
+                self.reg.e = self.reg.l;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x5E => {
+                let address = self.reg.hl_address();
+                self.reg.e = self.memory.read(address);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            // 8 bit loads to H (Register)
+            0x60 => {
+                self.reg.h = self.reg.b;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x61 => {
+                self.reg.h = self.reg.c;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x62 => {
+                self.reg.h = self.reg.d;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x63 => {
+                self.reg.h = self.reg.e;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x64 => {
+                self.reg.h = self.reg.h;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x65 => {
+                self.reg.h = self.reg.l;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x66 => {
+                let address = self.reg.hl_address();
+                self.reg.h = self.memory.read(address);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            // 8 bit loads to L (Register)
+            0x68 => {
+                self.reg.l = self.reg.b;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x69 => {
+                self.reg.l = self.reg.c;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x6A => {
+                self.reg.l = self.reg.d;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x6B => {
+                self.reg.l = self.reg.e;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x6C => {
+                self.reg.l = self.reg.h;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x6D => {
+                self.reg.l = self.reg.l;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x6E => {
+                let address = self.reg.hl_address();
+                self.reg.l = self.memory.read(address);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x70 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.b);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x71 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.c);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x72 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.d);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x73 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.e);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x74 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.h);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x75 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.l);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x36 => {
+                let address = self.reg.hl_address();
+                let value = self.memory.read(self.reg.pc as usize + 1);
+                self.memory.write(address, value);
+                self.reg.pc += 2;
+                self.cycles += 12;
+            }
+
             _ => panic!("{} op code not implemented", self.reg.pc),
         }
     }
