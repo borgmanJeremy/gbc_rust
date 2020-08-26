@@ -1,4 +1,7 @@
-mod gba;
+use gba::cpu::*;
+use gba::memory::*;
 
-fn main() {}
-
+fn main() {
+    let mem = MemoryMap::new(0xFFFF);
+    let cpu = Cpu::new(&mem);
+}
