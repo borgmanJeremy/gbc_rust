@@ -1,4 +1,5 @@
 use super::memory::MemoryMap;
+use std::num::Wrapping;
 #[derive(Debug)]
 struct Reg {
     a: u8,
@@ -38,6 +39,22 @@ impl Reg {
 
     fn hl_address(&self) -> usize {
         ((self.h as usize) << 8) + self.l as usize
+    }
+
+    fn decrement_hl(&mut self) {
+        let mut long = Wrapping(((self.h as u16) << 8) + self.l as u16);
+        long = long - Wrapping(1u16);
+
+        self.l = (long.0 & 0x00FF) as u8;
+        self.h = ((long.0 >> 8) & 0x00FF) as u8;
+    }
+
+    fn increment_hl(&mut self) {
+        let mut long = Wrapping(((self.h as u16) << 8) + self.l as u16);
+        long = long + Wrapping(1u16);
+
+        self.l = (long.0 & 0x00FF) as u8;
+        self.h = ((long.0 >> 8) & 0x00FF) as u8;
     }
 }
 
@@ -525,6 +542,51 @@ impl Cpu<'_> {
                 self.memory.write(address, self.reg.a);
                 self.reg.pc += 3;
                 self.cycles += 16;
+            }
+
+            0xF2 => {
+                let value = self.memory.read(0xFF00 + self.reg.c as usize);
+                self.reg.a = value;
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0xE2 => {
+                self.memory.write(0xFF00 + self.reg.c as usize, self.reg.a);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x3A => {
+                let address = self.reg.hl_address();
+                self.reg.a = self.memory.read(address);
+                self.reg.decrement_hl();
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x32 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.a);
+                self.reg.decrement_hl();
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x2A => {
+                let address = self.reg.hl_address();
+                self.reg.a = self.memory.read(address);
+                self.reg.increment_hl();
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x22 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.a);
+                self.reg.increment_hl();
+                self.reg.pc += 1;
+                self.cycles += 8;
             }
 
             _ => panic!("{} op code not implemented", self.reg.pc),
