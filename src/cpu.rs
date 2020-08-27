@@ -28,6 +28,13 @@ impl Reg {
             sp: 0,
         }
     }
+    fn bc_address(&self) -> usize {
+        ((self.b as usize) << 8) + self.c as usize
+    }
+
+    fn de_address(&self) -> usize {
+        ((self.d as usize) << 8) + self.e as usize
+    }
 
     fn hl_address(&self) -> usize {
         ((self.h as usize) << 8) + self.l as usize
@@ -68,6 +75,11 @@ impl Cpu<'_> {
             cycles: 0,
             memory: memory,
         }
+    }
+
+    fn two_byte_address(&self, base_address: usize) -> usize {
+        ((self.memory.read(base_address + 1) as usize) << 8)
+            + self.memory.read(base_address) as usize
     }
 
     pub fn step(&mut self) {
@@ -421,6 +433,98 @@ impl Cpu<'_> {
                 self.memory.write(address, value);
                 self.reg.pc += 2;
                 self.cycles += 12;
+            }
+
+            //A Loads from dereferenced
+            0x0A => {
+                let address = self.reg.bc_address();
+                let value = self.memory.read(address);
+                self.reg.a = value;
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+            0x1A => {
+                let address = self.reg.de_address();
+                let value = self.memory.read(address);
+                self.reg.a = value;
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0xFA => {
+                let address = self.two_byte_address(self.reg.pc as usize + 1);
+                let value = self.memory.read(address);
+                self.reg.a = value;
+                self.reg.pc += 3;
+                self.cycles += 16;
+            }
+
+            0x3E => {
+                self.reg.a = self.memory.read(self.reg.pc as usize + 1);
+                self.reg.pc += 2;
+                self.cycles += 8;
+            }
+
+            0x47 => {
+                self.reg.b = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+            0x4F => {
+                self.reg.c = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+
+            0x57 => {
+                self.reg.d = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+
+            0x5F => {
+                self.reg.e = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+
+            0x67 => {
+                self.reg.h = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+
+            0x6F => {
+                self.reg.l = self.reg.a;
+                self.reg.pc += 1;
+                self.cycles += 4;
+            }
+
+            0x02 => {
+                let address = self.reg.bc_address();
+                self.memory.write(address, self.reg.a);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+            0x12 => {
+                let address = self.reg.de_address();
+                self.memory.write(address, self.reg.a);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0x77 => {
+                let address = self.reg.hl_address();
+                self.memory.write(address, self.reg.a);
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0xEA => {
+                let address = self.two_byte_address(self.reg.pc as usize + 1);
+                self.memory.write(address, self.reg.a);
+                self.reg.pc += 3;
+                self.cycles += 16;
             }
 
             _ => panic!("{} op code not implemented", self.reg.pc),
