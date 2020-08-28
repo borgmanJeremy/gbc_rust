@@ -1381,7 +1381,6 @@ fn load_hl_from_a_dec() {
     assert_eq!(cpu.cycles, 8)
 }
 
-
 #[test]
 fn load_a_from_hl_inc() {
     let mem = MemoryMap::new(0xFFFF);
@@ -1401,9 +1400,6 @@ fn load_a_from_hl_inc() {
     assert_eq!(cpu.cycles, 8)
 }
 
-
-
-
 #[test]
 fn load_hl_from_a_inc() {
     let mem = MemoryMap::new(0xFFFF);
@@ -1418,6 +1414,129 @@ fn load_hl_from_a_inc() {
     assert_eq!(cpu.memory.read(0x0124), 0x55);
     assert_eq!(cpu.reg.h, 0x01);
     assert_eq!(cpu.reg.l, 0x25);
+    assert_eq!(cpu.reg.pc, 0x01);
+    assert_eq!(cpu.cycles, 8)
+}
+
+#[test]
+fn load_00ff_plus_n_from_a() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0xE0);
+    cpu.memory.write(1, 0x10);
+    cpu.reg.a = 0x55;
+
+    cpu.step();
+    assert_eq!(cpu.memory.read(0xFF10), 0x55);
+    assert_eq!(cpu.reg.pc, 0x02);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_a_from_00ff_plus_n() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0xF0);
+    cpu.memory.write(1, 0x10);
+    cpu.memory.write(0xFF10, 0x55);
+
+    cpu.reg.a = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.a, 0x55);
+    assert_eq!(cpu.reg.pc, 0x02);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_bc_from_nn() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0x01);
+    cpu.memory.write(1, 0x55);
+    cpu.memory.write(2, 0xAA);
+
+    cpu.reg.b = 0x00;
+    cpu.reg.c = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.b, 0xAA);
+    assert_eq!(cpu.reg.c, 0x55);
+    assert_eq!(cpu.reg.pc, 0x03);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_de_from_nn() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0x11);
+    cpu.memory.write(1, 0x55);
+    cpu.memory.write(2, 0xAA);
+
+    cpu.reg.d = 0x00;
+    cpu.reg.e = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.d, 0xAA);
+    assert_eq!(cpu.reg.e, 0x55);
+    assert_eq!(cpu.reg.pc, 0x03);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_hl_from_nn() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0x21);
+    cpu.memory.write(1, 0x55);
+    cpu.memory.write(2, 0xAA);
+
+    cpu.reg.h = 0x00;
+    cpu.reg.l = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.h, 0xAA);
+    assert_eq!(cpu.reg.l, 0x55);
+    assert_eq!(cpu.reg.pc, 0x03);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_sp_from_nn() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0x31);
+    cpu.memory.write(1, 0x55);
+    cpu.memory.write(2, 0xAA);
+
+    cpu.reg.sp = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.sp, 0xAA55);
+    assert_eq!(cpu.reg.pc, 0x03);
+    assert_eq!(cpu.cycles, 12)
+}
+
+#[test]
+fn load_sp_from_hl() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0xF9);
+
+    cpu.reg.h = 0x01;
+    cpu.reg.l = 0x24;
+    cpu.reg.sp = 0x00;
+
+    cpu.step();
+    assert_eq!(cpu.reg.sp, 0x0124);
     assert_eq!(cpu.reg.pc, 0x01);
     assert_eq!(cpu.cycles, 8)
 }

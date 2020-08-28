@@ -589,6 +589,62 @@ impl Cpu<'_> {
                 self.cycles += 8;
             }
 
+            0xE0 => {
+                self.memory.write(
+                    0xFF00 + self.memory.read((self.reg.pc + 1) as usize) as usize,
+                    self.reg.a,
+                );
+                self.reg.pc += 2;
+                self.cycles += 12;
+            }
+
+            0xF0 => {
+                let pc_val = self.memory.read((self.reg.pc + 1) as usize);
+                let value = self.memory.read(0xFF00 + pc_val as usize);
+                self.reg.a = value;
+                self.reg.pc += 2;
+                self.cycles += 12;
+            }
+
+            0x01 => {
+                self.reg.b = self.memory.read((self.reg.pc + 2) as usize);
+                self.reg.c = self.memory.read((self.reg.pc + 1) as usize);
+
+                self.reg.pc += 3;
+                self.cycles += 12;
+            }
+
+            0x11 => {
+                self.reg.d = self.memory.read((self.reg.pc + 2) as usize);
+                self.reg.e = self.memory.read((self.reg.pc + 1) as usize);
+
+                self.reg.pc += 3;
+                self.cycles += 12;
+            }
+
+            0x21 => {
+                self.reg.h = self.memory.read((self.reg.pc + 2) as usize);
+                self.reg.l = self.memory.read((self.reg.pc + 1) as usize);
+
+                self.reg.pc += 3;
+                self.cycles += 12;
+            }
+
+            0x31 => {
+                self.reg.sp = ((self.memory.read((self.reg.pc + 2) as usize) as u16) << 8)
+                    + self.memory.read((self.reg.pc + 1) as usize) as u16;
+
+                self.reg.pc += 3;
+                self.cycles += 12;
+            }
+
+            0xF9 => {
+                self.reg.sp = self.reg.hl_address() as u16;
+
+                self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
             _ => panic!("{} op code not implemented", self.reg.pc),
         }
     }
