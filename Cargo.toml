@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 sdl2 = "0.34"
-
+rand = "0.7.3"
 [[bin]]
 name = "main"
 path = "src/main.rs"
