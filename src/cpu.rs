@@ -69,11 +69,47 @@ struct Flag {
 impl Flag {
     fn new() -> Flag {
         Flag {
-            z: false,
-            n: false,
-            h: false,
-            c: false,
+            z: false, // zero flag
+            n: false, // subtract flag
+            h: false, // half carry
+            c: false, // cary flag
         }
+    }
+
+    fn adjust_zero_flag(&mut self, result: u16) {
+        if result & 0xFF == 0 {
+            self.z = true;
+        } else {
+            self.z = false;
+        }
+    }
+    fn adjust_carry_flag(&mut self, result: u16) {
+        if result > 0xFF {
+            self.c = true;
+        } else {
+            self.c = false;
+        }
+    }
+
+    fn adjust_half_carry_flag(&mut self, input: u8, result: u16) {
+        if input & 0x8 != 0 {
+            if result & 0x10 != 0 {
+                self.h = true;
+            } else {
+                self.h = false
+            }
+        }
+        // Can't carry out if the bit wasnt one before
+        else {
+            self.h = false;
+        }
+    }
+
+    fn set_subtract_flag(&mut self) {
+        self.n = true;
+    }
+    fn clear_subtract_flag(&mut self) {
+        self.n = false;
     }
 }
 
