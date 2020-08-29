@@ -1,6 +1,85 @@
 use super::*;
 
 #[test]
+fn test_clear_zero() {
+    let mut flags = Flag::new();
+
+    flags.z = true;
+
+    flags.clear_zero_flag();
+    assert_eq!(flags.z, false)
+}
+
+#[test]
+fn test_set_zero() {
+    let mut flags = Flag::new();
+
+    flags.z = false;
+
+    flags.set_zero_flag();
+    assert_eq!(flags.z, true)
+}
+
+#[test]
+fn test_adjust_zero() {
+    let mut flags = Flag::new();
+
+    flags.z = false;
+    flags.adjust_zero_flag(0);
+    assert_eq!(flags.z, true);
+
+    flags.z = true;
+    flags.adjust_zero_flag(1);
+    assert_eq!(flags.z, false);
+}
+
+#[test]
+fn test_clear_subtract() {
+    let mut flags = Flag::new();
+
+    flags.n = true;
+
+    flags.clear_subtract_flag();
+    assert_eq!(flags.n, false)
+}
+
+#[test]
+fn test_set_subtract() {
+    let mut flags = Flag::new();
+
+    flags.n = false;
+
+    flags.set_subtract_flag();
+    assert_eq!(flags.n, true)
+}
+
+#[test]
+fn test_adjust_carry() {
+    let mut flags = Flag::new();
+
+    flags.c = false;
+    flags.adjust_carry_flag(0xFF + 1);
+    assert_eq!(flags.c, true);
+
+    flags.c = true;
+    flags.adjust_carry_flag(0xFF);
+    assert_eq!(flags.c, false);
+}
+
+#[test]
+fn test_adjust_half_carry() {
+    let mut flags = Flag::new();
+
+    flags.h = false;
+    flags.adjust_half_carry_flag(0xF, 0x0F + 1);
+    assert_eq!(flags.h, true);
+
+    flags.h = true;
+    flags.adjust_half_carry_flag(0xE, 0x0E + 1);
+    assert_eq!(flags.h, false);
+}
+
+#[test]
 fn test_hl_dereference() {
     let mem = MemoryMap::new(0xFFFF);
     let mut cpu = Cpu::new(&mem);
@@ -83,7 +162,7 @@ fn test_de_dereference() {
 #[test]
 fn test_twobyte_dereference() {
     let mem = MemoryMap::new(0xFFFF);
-    let mut cpu = Cpu::new(&mem);
+    let cpu = Cpu::new(&mem);
     cpu.memory.write(0, 0x12);
     cpu.memory.write(1, 0x80);
 

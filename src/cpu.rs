@@ -76,6 +76,13 @@ impl Flag {
         }
     }
 
+    fn set_zero_flag(&mut self) {
+        self.z = true;
+    }
+    fn clear_zero_flag(&mut self) {
+        self.z = false;
+    }
+
     fn adjust_zero_flag(&mut self, result: u16) {
         if result & 0xFF == 0 {
             self.z = true;
@@ -678,6 +685,23 @@ impl Cpu<'_> {
                 self.reg.sp = self.reg.hl_address() as u16;
 
                 self.reg.pc += 1;
+                self.cycles += 8;
+            }
+
+            0xF8 => {
+                let orig = self.reg.sp;
+                let n = self.memory.read((self.reg.pc + 1) as usize) as u16;
+                let result = orig + n;
+
+                self.reg.l = result as u8 & 0xFF;
+                self.reg.h = (result >> 8) as u8 & 0xFF;
+
+                self.flag.clear_zero_flag();
+                self.flag.clear_subtract_flag();
+                self.flag.adjust_half_carry_flag(orig as u8, result);
+                self.flag.adjust_carry_flag(result);
+
+                self.reg.pc += 2;
                 self.cycles += 8;
             }
 
