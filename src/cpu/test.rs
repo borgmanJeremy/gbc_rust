@@ -58,14 +58,21 @@ fn test_adjust_carry() {
     let mut flags = Flag::new();
 
     flags.c = false;
-    flags.adjust_carry_flag(0xFF + 1);
+    flags.adjust_carry_flag(0xFF + 1, OperationType::B8);
     assert_eq!(flags.c, true);
 
     flags.c = true;
-    flags.adjust_carry_flag(0xFF);
+    flags.adjust_carry_flag(0xFF, OperationType::B8);
+    assert_eq!(flags.c, false);
+
+    flags.c = false;
+    flags.adjust_carry_flag(0xFFFF + 1, OperationType::B16);
+    assert_eq!(flags.c, true);
+
+    flags.c = true;
+    flags.adjust_carry_flag(0xFFFF, OperationType::B16);
     assert_eq!(flags.c, false);
 }
-
 #[test]
 fn test_adjust_half_carry() {
     let mut flags = Flag::new();
@@ -1618,4 +1625,37 @@ fn load_sp_from_hl() {
     assert_eq!(cpu.reg.sp, 0x0124);
     assert_eq!(cpu.reg.pc, 0x01);
     assert_eq!(cpu.cycles, 8)
+}
+
+
+#[test]
+fn load_hl_from_sp_plus_n() {
+    let mem = MemoryMap::new(0xFFFF);
+    let mut cpu = Cpu::new(&mem);
+
+    cpu.memory.write(0, 0xF8);
+    cpu.memory.write(1, 0x01);
+
+    cpu.reg.sp = 0x0123;
+    cpu.reg.h = 0;
+    cpu.reg.l = 0;
+
+    cpu.flag.z = true;
+    cpu.flag.n = true;
+    cpu.flag.h = true;
+    cpu.flag.c = true;
+
+    cpu.step();
+
+    assert_eq!(cpu.reg.h, 0x01);
+    assert_eq!(cpu.reg.l, 0x24);
+
+    assert_eq!(cpu.flag.z, false);
+    assert_eq!(cpu.flag.n, false);
+    assert_eq!(cpu.flag.h, false);
+    assert_eq!(cpu.flag.c, false);
+    
+    assert_eq!(cpu.reg.pc, 0x02);
+    assert_eq!(cpu.cycles, 12)
+
 }

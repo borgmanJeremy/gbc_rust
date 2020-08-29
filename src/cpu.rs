@@ -1,5 +1,11 @@
 use super::memory::MemoryMap;
 use std::num::Wrapping;
+
+enum OperationType {
+    B8,
+    B16,
+}
+
 #[derive(Debug)]
 struct Reg {
     a: u8,
@@ -90,15 +96,26 @@ impl Flag {
             self.z = false;
         }
     }
-    fn adjust_carry_flag(&mut self, result: u16) {
-        if result > 0xFF {
-            self.c = true;
-        } else {
-            self.c = false;
+    fn adjust_carry_flag(&mut self, result: u32, op_type: OperationType) {
+        match op_type {
+            OperationType::B8 => {
+                if result > 0xFF {
+                    self.c = true;
+                } else {
+                    self.c = false;
+                }
+            }
+            OperationType::B16 => {
+                if result > 0xFFFF {
+                    self.c = true;
+                } else {
+                    self.c = false;
+                }
+            }
         }
     }
 
-    fn adjust_half_carry_flag(&mut self, input: u8, result: u16) {
+    fn adjust_half_carry_flag(&mut self, input: u8, result: u32) {
         if input & 0x8 != 0 {
             if result & 0x10 != 0 {
                 self.h = true;
@@ -691,7 +708,7 @@ impl Cpu<'_> {
             0xF8 => {
                 let orig = self.reg.sp;
                 let n = self.memory.read((self.reg.pc + 1) as usize) as u16;
-                let result = orig + n;
+                let result = orig as u32 + n as u32;
 
                 self.reg.l = result as u8 & 0xFF;
                 self.reg.h = (result >> 8) as u8 & 0xFF;
@@ -699,10 +716,20 @@ impl Cpu<'_> {
                 self.flag.clear_zero_flag();
                 self.flag.clear_subtract_flag();
                 self.flag.adjust_half_carry_flag(orig as u8, result);
-                self.flag.adjust_carry_flag(result);
+                self.flag.adjust_carry_flag(result, OperationType::B16);
 
                 self.reg.pc += 2;
-                self.cycles += 8;
+                self.cycles += 12;
+            }
+
+            0x08 => {
+                let address = self.two_byte_address((self.reg.pc + 1) as usize);
+
+                self.memory.write(address, (self.reg.sp & 0xFF) as u8);
+                self.memory
+                    .write(address + 1, ((self.reg.sp >> 8) & 0xFF) as u8);
+                self.reg.pc += 3;
+                self.cycles += 20;
             }
 
             _ => panic!("{} op code not implemented", self.reg.pc),
