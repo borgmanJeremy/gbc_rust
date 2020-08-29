@@ -29,7 +29,7 @@ fn main() {
     let desired_spec = AudioSpecDesired {
         freq: Some(44100),
         channels: Some(1), // mono
-        samples: None,     // default sample size
+        samples: Some(4096),     // default sample size
     };
 
     let device = audio_subsystem
