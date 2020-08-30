@@ -154,6 +154,12 @@ impl Cpu<'_> {
         }
     }
 
+    fn push_to_stack(&mut self, value: u8) {
+        self.memory.write(self.reg.sp as usize - 1, value);
+
+        self.reg.sp = self.reg.sp - 1;
+    }
+
     fn two_byte_address(&self, base_address: usize) -> usize {
         ((self.memory.read(base_address + 1) as usize) << 8)
             + self.memory.read(base_address) as usize
@@ -730,6 +736,52 @@ impl Cpu<'_> {
                     .write(address + 1, ((self.reg.sp >> 8) & 0xFF) as u8);
                 self.reg.pc += 3;
                 self.cycles += 20;
+            }
+
+            0xF5 => {
+                let mut flag_reg: u8 = 0;
+
+                if self.flag.z == true {
+                    flag_reg |= 0x01;
+                }
+
+                if self.flag.n == true {
+                    flag_reg |= 0x02;
+                }
+
+                if self.flag.h == true {
+                    flag_reg |= 0x04;
+                }
+
+                if self.flag.c == true {
+                    flag_reg |= 0x09;
+                }
+
+                self.push_to_stack(self.reg.a);
+                self.push_to_stack(flag_reg);
+
+                self.reg.pc += 1;
+                self.cycles += 16;
+            }
+
+            0xC5 => {
+                self.push_to_stack(self.reg.b);
+                self.push_to_stack(self.reg.c);
+                self.reg.pc += 1;
+                self.cycles += 16;
+            }
+            0xD5 => {
+                self.push_to_stack(self.reg.d);
+                self.push_to_stack(self.reg.e);
+                self.reg.pc += 1;
+                self.cycles += 16;
+            }
+
+            0xE5 => {
+                self.push_to_stack(self.reg.h);
+                self.push_to_stack(self.reg.l);
+                self.reg.pc += 1;
+                self.cycles += 16;
             }
 
             _ => panic!("{} op code not implemented", self.reg.pc),
